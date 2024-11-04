@@ -11,7 +11,13 @@ public class Usuario {
     private String date;
 
     public Usuario() {}
-    public Usuario(String correo, String plataforma, Boolean admin, Integer version, String date) {}
+    public Usuario(String correo, String plataforma, Boolean admin, Integer version, String date) {
+        this.correo = correo;
+        this.plataforma = plataforma;
+        this.admin = admin;
+        this.version = version;
+        this.date = date;
+    }
 
 
 }

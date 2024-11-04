@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class HelloController implements Initializable {
     @FXML
     private TextField idNuevoCorreo;
     @FXML
-    private TableColumn iddate;
+    private TableColumn<Usuario, String> iddate;
     @FXML
     private Button añadirBtn;
     @FXML
@@ -37,7 +38,7 @@ public class HelloController implements Initializable {
     @FXML
     private CheckBox idNuevoAdmin;
     @FXML
-    private TableView idTabla;
+    private TableView<Usuario> idTabla;
 
     @FXML
     protected void onHelloButtonClick() {}
@@ -56,23 +57,40 @@ public class HelloController implements Initializable {
         idadmin.setCellValueFactory((fila) -> {
             return new SimpleBooleanProperty(fila.getValue().getAdmin());
         });
+        iddate.setCellValueFactory((fila) -> {
+            return new SimpleStringProperty(fila.getValue().getDate());
+        });
+
         idNuevoPlataforma.getItems().addAll("Windows", "Linux", "MacOs");
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5);
+        idNuevoVersion.setValueFactory(valueFactory);
+
 
         añadirBtn.setOnAction(event -> nuevaFila());
         limpiarBtn.setOnAction(event -> limpiarTabla());
+
+        idTabla.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Usuario usuarioSeleccionado = (Usuario)idTabla.getSelectionModel().getSelectedItem();
+                if (usuarioSeleccionado != null) {
+                    mostrarDetallesUsuario(usuarioSeleccionado);
+                }
+            }
+        });
     }
     /**
      * Recogemos los valores de los campos, creamos un usuario y lo añadimos a la tabla
      * **/
     public void nuevaFila() {
-
         String c1 = idNuevoCorreo.getText();
         String c2 = idNuevoPlataforma.getValue();
         Integer c3 = (Integer) idNuevoVersion.getValue();
         Boolean c4 = idNuevoAdmin.isSelected();
         String c5 = LocalDateTime.now().toString();
+
         Usuario usuario = new Usuario(c1,c2,c4,c3,c5);
         idTabla.getItems().add(usuario);
+        idTabla.refresh();
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Nuevo Usuario");
@@ -92,10 +110,24 @@ public class HelloController implements Initializable {
             idTabla.getItems().clear();
         }
     }
-    public void mostrar(){
-        Usuario modeloSelec = (Usuario) idTabla.getSelectionModel().getSelectedItem();
+    /**
+     * muestra los detalles completos del usuario
+     * **/
+    private void mostrarDetallesUsuario(Usuario usuario) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Detalles del Usuario");
 
+        VBox dialogPane = new VBox();
+        dialogPane.getChildren().addAll(
+                new Label("Correo: " + usuario.getCorreo()),
+                new Label("Plataforma: " + usuario.getPlataforma()),
+                new Label("Versión: " + usuario.getVersion()),
+                new Label("Administrador: " + (usuario.getAdmin() ? "Sí" : "No")),
+                new Label("Fecha: " + usuario.getDate())
+        );
 
+        dialog.getDialogPane().setContent(dialogPane);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.showAndWait();
     }
-
 }
